@@ -1,0 +1,156 @@
+package com.example.rdd;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Spinner;
+
+import java.io.ByteArrayOutputStream;
+
+import Model.Character;
+import Storage.JSONFileStorageCharacter;
+
+public class Create_Character extends AppCompatActivity implements
+        AdapterView.OnItemSelectedListener {
+
+    public static final int REQUEST_IMAGE_CAPTURE=1;
+    public static final String EXTRA_CHARACTER="character";
+
+    String[] raceListe = {"Elf", "Orc", "Human"};
+
+    private Character myCharac;
+    private EditText nameET, intelligenceET, strengthET, agilityET;
+    private String name, race;
+    private int intel, strength, agility;
+    private String photo;
+    private Spinner spinnerRace;
+    private ImageButton imageBT;
+    private Bitmap image;
+    private Button nameBT, intelligenceBT, strengthBT, agilityBT, raceBT, createBt;
+    private JSONFileStorageCharacter fichier;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_create__character);
+
+        fichier=JSONFileStorageCharacter.get(getApplicationContext());
+
+        spinnerRace = (Spinner) findViewById(R.id.raceSpinner);
+        spinnerRace.setOnItemSelectedListener(this);
+
+        //Creating the ArrayAdapter instance having the country list
+        ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,raceListe);
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //Setting the ArrayAdapter data on the Spinner
+        spinnerRace.setAdapter(aa);
+
+        nameET=this.findViewById(R.id.nameET);
+        intelligenceET=this.findViewById(R.id.intellET);
+        strengthET=this.findViewById(R.id.strengthET);
+        agilityET=this.findViewById(R.id.agilityET);
+
+        agilityBT=this.findViewById(R.id.agilityBT);
+        strengthBT=this.findViewById(R.id.strengthBT);
+        intelligenceBT=this.findViewById(R.id.intellBT);
+        raceBT=this.findViewById(R.id.raceBT);
+        createBt=this.findViewById(R.id.createBT);
+        imageBT=this.findViewById(R.id.imageBT);
+
+        strengthBT.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View w){
+                strengthET.setText(Integer.toString((int)((Math.random()*20)+1)));
+            }
+
+        });
+        raceBT.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View w){
+                spinnerRace.setSelection((int)((Math.random()*raceListe.length)));
+            }
+
+        });
+        agilityBT.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View w){
+                agilityET.setText(Integer.toString((int)((Math.random()*20)+1)));
+            }
+
+        });
+        intelligenceBT.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View w){
+                intelligenceET.setText(Integer.toString((int)((Math.random()*20)+1)));
+            }
+
+        });
+
+        imageBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View w) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                }
+            }
+        });
+
+
+        createBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                name        =   nameET.getText().toString();
+                intel       =   Integer.parseInt(intelligenceET.getText().toString());
+                strength    =   Integer.parseInt(strengthET.getText().toString());
+                agility     =   Integer.parseInt(agilityET.getText().toString());
+                photo       =   imageBT.toString();
+                if(image==null){
+                    fichier.insert(name,race,intel,strength,agility,null);
+
+                } else {
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                    image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream .toByteArray();
+                    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                    fichier.insert(name,race,intel,strength,agility,encoded);
+
+                }
+
+                finish();
+            }
+        });
+    }
+    protected void onActivityResult(int requestCode,int resultCode,Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
+            image=(Bitmap)data.getExtras().get("data");
+            imageBT.setImageBitmap((Bitmap) data.getExtras().get("data"));
+    }
+    //Performing action onItemSelected and onNothing selected
+    @Override
+    public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
+        race=spinnerRace.getSelectedItem().toString();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> arg0) {
+        // TODO Auto-generated method stub
+    }
+
+
+
+}

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">R D&amp;D</string>
+    <string name="action_settings">Settings</string>
+    <string-array name="raceChoice">
+        <item>Human</item>
+        <item>Orc</item>
+        <item>Elf</item>
+        <item>Dwarf</item>
+    </string-array>
+    <string name="title_activity_monster">MonsterActivity</string>
+    <string name="title_activity_encounter">EncounterActivity</string>
+    <string name="title_activity_create__character">Create_Character</string>
+    <string name="title_activity_create__monster">Create_Monster</string>
+</resources>
